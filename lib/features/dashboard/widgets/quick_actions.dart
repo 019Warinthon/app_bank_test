@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../profile/widgets/pin_auth_sheet.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -35,7 +36,20 @@ class QuickActions extends StatelessWidget {
                   right: action != actions.last ? 10 : 0,
                 ),
                 child: GestureDetector(
-                  onTap: () => context.push(action.route),
+                  onTap: () async {
+                    if (action.route == '/transfer') {
+                      final authenticated = await PinAuthSheet.show(
+                        context,
+                        title: 'ยืนยันรหัสความปลอดภัย',
+                        subtitle: 'กรุณากรอกรหัส PIN หรือสแกนลายนิ้วมือเพื่อเข้าสู่ระบบโอนเงิน',
+                      );
+                      if (authenticated && context.mounted) {
+                        context.push(action.route);
+                      }
+                    } else {
+                      context.push(action.route);
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(

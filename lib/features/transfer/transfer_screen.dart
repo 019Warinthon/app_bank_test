@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../dashboard/services/account_service.dart';
+import '../profile/widgets/pin_auth_sheet.dart';
 import 'services/transfer_service.dart';
 
 class TransferScreen extends StatefulWidget {
@@ -212,8 +213,25 @@ class _TransferScreenState extends State<TransferScreen> {
               width: double.infinity,
               child: BlocksButton(
                 label: 'โอนเงิน',
-                onPressed: () {
-                  DialogConfirmation.show(context);
+                onPressed: () async {
+                  final amountText = _amountController.text.trim();
+                  if (amountText.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('กรุณากรอกจำนวนเงินที่ต้องการโอน')),
+                    );
+                    return;
+                  }
+
+                  // Confirm PIN before final transaction execution
+                  final authenticated = await PinAuthSheet.show(
+                    context,
+                    title: 'ยืนยันการทำรายการโอน',
+                    subtitle: 'กรุณากรอกรหัส PIN หรือสแกนเพื่อยืนยันการโอน ฿$amountText',
+                  );
+
+                  if (authenticated && context.mounted) {
+                    _showTransferSuccessDialog(context, amountText);
+                  }
                 },
                 variant: BlocksButtonVariant.primary,
               ),
@@ -221,6 +239,61 @@ class _TransferScreenState extends State<TransferScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showTransferSuccessDialog(BuildContext context, String amount) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+        final fg = isDark ? AppColors.foregroundDark : AppColors.foregroundLight;
+        final muted = isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
+
+        return AlertDialog(
+          backgroundColor: cardBg,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          contentPadding: const EdgeInsets.all(24),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF10B981),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check_rounded, color: Colors.white, size: 36),
+              ),
+              const SizedBox(height: 16),
+              Text('โอนเงินสำเร็จ!', style: AppTextStyles.h3(color: fg)),
+              const SizedBox(height: 8),
+              Text('฿$amount.00', style: AppTextStyles.h1(color: fg).copyWith(fontSize: 28)),
+              const SizedBox(height: 12),
+              Text(
+                'บันทึกสลิปและส่งรายการสำเร็จเรียบร้อยแล้ว',
+                style: AppTextStyles.bodySmall(color: muted),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: BlocksButton(
+                  label: 'กลับสู่หน้าหลัก',
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                    Navigator.of(context).pop();
+                  },
+                  variant: BlocksButtonVariant.primary,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

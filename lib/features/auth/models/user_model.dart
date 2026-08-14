@@ -31,15 +31,19 @@ class UserModel {
   }
 
   String get tierLabel => switch (tier) {
-    MembershipTier.basic    => 'Basic Member',
-    MembershipTier.silver   => 'Silver Member',
-    MembershipTier.gold     => 'Gold Member',
+    MembershipTier.basic => 'Basic Member',
+    MembershipTier.silver => 'Silver Member',
+    MembershipTier.gold => 'Gold Member',
     MembershipTier.platinum => 'Platinum Member',
   };
 
   UserModel copyWith({
-    String? fullName, String? email, String? phone,
-    String? avatarUrl, MembershipTier? tier, String? promptPayId,
+    String? fullName,
+    String? email,
+    String? phone,
+    String? avatarUrl,
+    MembershipTier? tier,
+    String? promptPayId,
   }) => UserModel(
     id: id,
     fullName: fullName ?? this.fullName,
