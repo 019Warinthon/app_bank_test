@@ -15,12 +15,36 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
   String? _selectedBiller;
 
   final _billers = const [
-    {'name': 'การไฟฟ้า (MEA/PEA)', 'icon': LucideIcons.zap, 'color': Color(0xFFF59E0B)},
-    {'name': 'การประปา (MWA/PWA)', 'icon': LucideIcons.droplet, 'color': Color(0xFF3B82F6)},
-    {'name': 'อินเทอร์เน็ต / ดิจิทัล', 'icon': LucideIcons.wifi, 'color': Color(0xFF6366F1)},
-    {'name': 'บัตรเครดิต & สินเชื่อ', 'icon': LucideIcons.creditCard, 'color': Color(0xFF10B981)},
-    {'name': 'ประกันภัย & ประกันชีวิต', 'icon': LucideIcons.shieldCheck, 'color': Color(0xFFEC4899)},
-    {'name': 'ค่าเทอม & การศึกษา', 'icon': LucideIcons.graduationCap, 'color': Color(0xFF8B5CF6)},
+    {
+      'name': 'การไฟฟ้า (MEA/PEA)',
+      'icon': LucideIcons.zap,
+      'color': Color(0xFFF59E0B),
+    },
+    {
+      'name': 'การประปา (MWA/PWA)',
+      'icon': LucideIcons.droplet,
+      'color': Color(0xFF3B82F6),
+    },
+    {
+      'name': 'อินเทอร์เน็ต / ดิจิทัล',
+      'icon': LucideIcons.wifi,
+      'color': Color(0xFF6366F1),
+    },
+    {
+      'name': 'บัตรเครดิต & สินเชื่อ',
+      'icon': LucideIcons.creditCard,
+      'color': Color(0xFF10B981),
+    },
+    {
+      'name': 'ประกันภัย & ประกันชีวิต',
+      'icon': LucideIcons.shieldCheck,
+      'color': Color(0xFFEC4899),
+    },
+    {
+      'name': 'ค่าเทอม & การศึกษา',
+      'icon': LucideIcons.graduationCap,
+      'color': Color(0xFF8B5CF6),
+    },
   ];
 
   @override
@@ -35,7 +59,9 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
     final fg = isDark ? AppColors.foregroundDark : AppColors.foregroundLight;
-    final muted = isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
+    final muted = isDark
+        ? AppColors.mutedForegroundDark
+        : AppColors.mutedForegroundLight;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final border = isDark ? AppColors.borderDark : AppColors.borderLight;
 
@@ -74,11 +100,15 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
                 final color = biller['color'] as Color;
 
                 return GestureDetector(
-                  onTap: () => setState(() => _selectedBiller = biller['name'] as String),
+                  onTap: () => setState(
+                    () => _selectedBiller = biller['name'] as String,
+                  ),
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isSelected ? color.withValues(alpha: 0.15) : cardBg,
+                      color: isSelected
+                          ? color.withValues(alpha: 0.15)
+                          : cardBg,
                       borderRadius: BorderRadius.circular(AppColors.radiusLg),
                       border: Border.all(
                         color: isSelected ? color : border,
@@ -92,17 +122,28 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
                           height: 40,
                           decoration: BoxDecoration(
                             color: color.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(AppColors.radiusMd),
+                            borderRadius: BorderRadius.circular(
+                              AppColors.radiusMd,
+                            ),
                           ),
-                          child: Icon(biller['icon'] as IconData, color: color, size: 20),
+                          child: Icon(
+                            biller['icon'] as IconData,
+                            color: color,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             biller['name'] as String,
-                            style: AppTextStyles.caption(
-                              color: isSelected ? color : fg,
-                            ).copyWith(fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500),
+                            style:
+                                AppTextStyles.caption(
+                                  color: isSelected ? color : fg,
+                                ).copyWith(
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -116,7 +157,10 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
 
             if (_selectedBiller != null) ...[
               const SizedBox(height: 28),
-              Text('รายละเอียดบิล: $_selectedBiller', style: AppTextStyles.label(color: fg)),
+              Text(
+                'รายละเอียดบิล: $_selectedBiller',
+                style: AppTextStyles.label(color: fg),
+              ),
               const SizedBox(height: 12),
               BlocksInput(
                 label: 'เลขที่อ้างอิง / เลขประจำตัวผู้เสียภาษี',
@@ -130,7 +174,10 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
                 hint: '0.00',
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                leading: const Text('฿', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                leading: const Text(
+                  '฿',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
               const SizedBox(height: 28),
               SizedBox(
@@ -146,7 +193,10 @@ class _PayBillsScreenState extends State<PayBillsScreen> {
             ],
 
             const SizedBox(height: 28),
-            Text('คำแนะนำการชำระบิล', style: AppTextStyles.bodySmall(color: muted)),
+            Text(
+              'คำแนะนำการชำระบิล',
+              style: AppTextStyles.bodySmall(color: muted),
+            ),
             const SizedBox(height: 12),
             const GridListIcons(),
           ],
