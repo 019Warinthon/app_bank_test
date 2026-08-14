@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../data/mock/mock_data.dart';
@@ -26,7 +27,7 @@ class RecentTransactions extends StatelessWidget {
           children: [
             Text('รายการล่าสุด', style: AppTextStyles.h4(color: fg)),
             TextButton(
-              onPressed: () {},
+              onPressed: () => context.go('/transactions'),
               child: Text(
                 'ดูทั้งหมด →',
                 style: AppTextStyles.bodySmall(color: AppColors.chartIndigo),

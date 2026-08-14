@@ -15,7 +15,7 @@ import '../features/notifications/notifications_screen.dart';
 import '../shared/app_shell.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/dashboard',
+  initialLocation: '/login',
   routes: [
     GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
