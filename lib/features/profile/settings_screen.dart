@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -79,12 +80,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color: AppColors.chartIndigo.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(LucideIcons.lock, color: AppColors.chartIndigo, size: 18),
+                      child: const Icon(LucideIcons.shieldCheck, color: AppColors.chartIndigo, size: 18),
                     ),
-                    title: Text('เปลี่ยนรหัส PIN 6 หลัก', style: AppTextStyles.label(color: fg)),
+                    title: Text('รหัสผ่าน & ความปลอดภัย (PIN / Biometrics)', style: AppTextStyles.label(color: fg)),
+                    subtitle: Text('ตั้งค่ารหัส PIN 6 หลัก, Face ID และลายนิ้วมือ', style: AppTextStyles.caption(color: muted)),
                     trailing: const Icon(LucideIcons.chevronRight, size: 18),
                     onTap: () {
-                      DialogPasswordConfirm.show(context);
+                      context.push('/security');
                     },
                   ),
                 ],

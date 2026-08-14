@@ -10,6 +10,7 @@ import '../features/payments/qr_scan_screen.dart';
 import '../features/ai_assistant/ai_chat_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/profile/settings_screen.dart';
+import '../features/profile/security_screen.dart';
 import '../features/notifications/notifications_screen.dart';
 import '../shared/app_shell.dart';
 
@@ -44,6 +45,7 @@ final appRouter = GoRouter(
     GoRoute(path: '/pay-bills', builder: (_, _) => const PayBillsScreen()),
     GoRoute(path: '/qr-scan', builder: (_, _) => const QrScanScreen()),
     GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
+    GoRoute(path: '/security', builder: (_, _) => const SecurityScreen()),
     GoRoute(path: '/notifications', builder: (_, _) => const NotificationsScreen()),
   ],
 );
