@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../profile/widgets/pin_auth_sheet.dart';
 import 'models/card_model.dart';
 import 'services/card_service.dart';
 
@@ -103,6 +104,22 @@ class _CardsScreenState extends State<CardsScreen> {
                     cardBg: cardBg,
                     border: border,
                     muted: muted,
+                    onTap: () async {
+                      final authenticated = await PinAuthSheet.show(
+                        context,
+                        title: currentCardData.isLocked ? 'ยืนยันเพื่อปลดล็อคบัตร' : 'ยืนยันเพื่อล็อคบัตร',
+                        subtitle: 'กรุณากรอกรหัส PIN หรือสแกนเพื่อเปลี่ยนสถานะความปลอดภัยของบัตร',
+                      );
+                      if (authenticated) {
+                        await CardService.instance.toggleLock(currentCardData.id);
+                        setState(() {});
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(currentCardData.isLocked ? 'ล็อคบัตรเรียบร้อยแล้ว' : 'ปลดล็อคบัตรเรียบร้อยแล้ว')),
+                          );
+                        }
+                      }
+                    },
                   ),
                   const SizedBox(width: 10),
                   _CardAction(
@@ -112,6 +129,11 @@ class _CardsScreenState extends State<CardsScreen> {
                     cardBg: cardBg,
                     border: border,
                     muted: muted,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('กำลังเปิดเมนูตั้งค่าบัตร')),
+                      );
+                    },
                   ),
                   const SizedBox(width: 10),
                   _CardAction(
@@ -121,6 +143,16 @@ class _CardsScreenState extends State<CardsScreen> {
                     cardBg: cardBg,
                     border: border,
                     muted: muted,
+                    onTap: () async {
+                      final authenticated = await PinAuthSheet.show(
+                        context,
+                        title: 'ยืนยันตัวตนเพื่อดูข้อมูลบัตร',
+                        subtitle: 'กรุณากรอกรหัส PIN หรือสแกนเพื่อดูหมายเลขบัตรเต็มและรหัส CVV',
+                      );
+                      if (authenticated && context.mounted) {
+                        _showCardDetailsModal(context, currentCardData);
+                      }
+                    },
                   ),
                 ],
               ),
@@ -173,6 +205,130 @@ class _CardsScreenState extends State<CardsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showCardDetailsModal(BuildContext context, CardModel card) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
+        final fg = isDark ? AppColors.foregroundDark : AppColors.foregroundLight;
+        final muted = isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
+        final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: card.gradientColors),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(LucideIcons.creditCard, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('ข้อมูลบัตร ${card.tierLabel} ${card.networkLabel}', style: AppTextStyles.h4(color: fg)),
+                          Text('ปลดล็อคข้อมูลความปลอดภัยเรียบร้อยแล้ว', style: AppTextStyles.caption(color: AppColors.success)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Divider(color: border, height: 1),
+                const SizedBox(height: 16),
+                _InfoCardRow(label: 'หมายเลขบัตร', value: card.cardNumber, canCopy: true, fg: fg, muted: muted),
+                const SizedBox(height: 12),
+                _InfoCardRow(label: 'ชื่อผู้ถือบัตร', value: card.holderName, fg: fg, muted: muted),
+                const SizedBox(height: 12),
+                _InfoCardRow(label: 'วันหมดอายุ (EXP)', value: card.expiryDate, fg: fg, muted: muted),
+                const SizedBox(height: 12),
+                _InfoCardRow(label: 'รหัสความปลอดภัย (CVV)', value: card.cvv, isSecret: true, fg: fg, muted: muted),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: BlocksButton(
+                    label: 'ปิด',
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    variant: BlocksButtonVariant.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _InfoCardRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool canCopy;
+  final bool isSecret;
+  final Color fg;
+  final Color muted;
+
+  const _InfoCardRow({
+    required this.label,
+    required this.value,
+    this.canCopy = false,
+    this.isSecret = false,
+    required this.fg,
+    required this.muted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: AppTextStyles.bodySmall(color: muted)),
+        Row(
+          children: [
+            Text(
+              value,
+              style: AppTextStyles.label(color: isSecret ? AppColors.destructiveLight : fg)
+                  .copyWith(fontWeight: FontWeight.w700, letterSpacing: isSecret ? 2 : 1),
+            ),
+            if (canCopy) ...[
+              const SizedBox(width: 8),
+              Icon(LucideIcons.copy, size: 14, color: AppColors.chartIndigo),
+            ],
+          ],
+        ),
+      ],
     );
   }
 }
@@ -305,6 +461,7 @@ class _CardAction extends StatelessWidget {
   final Color cardBg;
   final Color border;
   final Color muted;
+  final VoidCallback? onTap;
 
   const _CardAction({
     required this.icon,
@@ -313,13 +470,14 @@ class _CardAction extends StatelessWidget {
     required this.cardBg,
     required this.border,
     required this.muted,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: GestureDetector(
-        onTap: () {},
+        onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(

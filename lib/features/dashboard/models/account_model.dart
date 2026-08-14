@@ -29,6 +29,13 @@ class AccountModel {
   String get maskedNumber =>
       '••••${accountNumber.substring(accountNumber.length - 4)}';
 
+  String get formattedNumber {
+    if (accountNumber.length == 10) {
+      return '${accountNumber.substring(0, 3)}-${accountNumber.substring(3, 4)}-${accountNumber.substring(4, 9)}-${accountNumber.substring(9)}';
+    }
+    return accountNumber;
+  }
+
   bool get isActive => status == AccountStatus.active;
   bool get isCreditAccount => type == AccountType.credit;
 

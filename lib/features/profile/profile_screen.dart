@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'widgets/pin_auth_sheet.dart';
 
 /// Profile screen using lux_blocks FormSideLabels block
 class ProfileScreen extends StatelessWidget {
@@ -94,7 +95,16 @@ class ProfileScreen extends StatelessWidget {
                     label: 'รหัสผ่าน & ความปลอดภัย',
                     subtitle: 'PIN, Face ID, ลายนิ้วมือ',
                     iconBg: AppColors.chartPurple,
-                    onTap: () => context.push('/security'),
+                    onTap: () async {
+                      final authenticated = await PinAuthSheet.show(
+                        context,
+                        title: 'ยืนยันรหัสความปลอดภัยเดิม',
+                        subtitle: 'กรุณากรอกรหัส PIN เดิมเพื่อเข้าสู่เมนูตั้งค่าความปลอดภัย',
+                      );
+                      if (authenticated && context.mounted) {
+                        context.push('/security');
+                      }
+                    },
                   ),
                   Divider(color: border, height: 1),
                   _ProfileMenuItem(
