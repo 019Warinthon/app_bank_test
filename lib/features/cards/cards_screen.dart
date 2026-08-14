@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../data/mock/mock_data.dart';
-import '../../data/models/card_model.dart';
+import 'models/card_model.dart';
+import 'services/card_service.dart';
 
 class CardsScreen extends StatefulWidget {
   const CardsScreen({super.key});
@@ -31,7 +31,8 @@ class _CardsScreenState extends State<CardsScreen> {
     final border = isDark ? AppColors.borderDark : AppColors.borderLight;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
 
-    final currentCardData = MockData.cards[_currentCard];
+    final cards = CardService.instance.getAll();
+    final currentCardData = cards[_currentCard.clamp(0, cards.length - 1)];
 
     return Scaffold(
       backgroundColor: bg,
@@ -56,10 +57,10 @@ class _CardsScreenState extends State<CardsScreen> {
               height: 210,
               child: PageView.builder(
                 controller: _pageController,
-                itemCount: MockData.cards.length,
+                itemCount: cards.length,
                 onPageChanged: (i) => setState(() => _currentCard = i),
                 itemBuilder: (context, index) {
-                  final card = MockData.cards[index];
+                  final card = cards[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: _CreditCardWidget(card: card),
@@ -72,7 +73,7 @@ class _CardsScreenState extends State<CardsScreen> {
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(MockData.cards.length, (i) {
+              children: List.generate(cards.length, (i) {
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -182,7 +183,7 @@ class _CreditCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isVisa = card.type == CardType.visa;
+    final isVisa = card.network == CardNetwork.visa;
     final colors = card.tier == CardTier.platinum
         ? [const Color(0xFF1A1A2E), const Color(0xFF16213E), const Color(0xFF0F3460)]
         : [const Color(0xFFD4AF37), const Color(0xFFC5961E), const Color(0xFFB8860B)];

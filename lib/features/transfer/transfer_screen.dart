@@ -1,7 +1,10 @@
+// lib/features/transfer/transfer_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../data/mock/mock_data.dart';
+import '../dashboard/services/account_service.dart';
+import 'services/transfer_service.dart';
 
 class TransferScreen extends StatefulWidget {
   const TransferScreen({super.key});
@@ -14,6 +17,9 @@ class _TransferScreenState extends State<TransferScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   int _selectedContact = -1;
+
+  final _accountService = AccountService.instance;
+  final _transferService = TransferService.instance;
 
   @override
   void dispose() {
@@ -31,6 +37,10 @@ class _TransferScreenState extends State<TransferScreen> {
         isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final border = isDark ? AppColors.borderDark : AppColors.borderLight;
+
+    final accounts = _accountService.getDepositAccounts();
+    final primaryAccount = accounts.isNotEmpty ? accounts.first : null;
+    final contacts = _transferService.getContacts();
 
     return Scaffold(
       backgroundColor: bg,
@@ -50,43 +60,44 @@ class _TransferScreenState extends State<TransferScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── From Account ──
-            BlocksCard(
-              child: Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.chartIndigo.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppColors.radiusMd),
+            if (primaryAccount != null)
+              BlocksCard(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.chartIndigo.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppColors.radiusMd),
+                      ),
+                      child: const Icon(
+                        LucideIcons.wallet,
+                        color: AppColors.chartIndigo,
+                        size: 20,
+                      ),
                     ),
-                    child: const Icon(
-                      LucideIcons.wallet,
-                      color: AppColors.chartIndigo,
-                      size: 20,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('จากบัญชี', style: AppTextStyles.caption(color: muted)),
+                          Text(
+                            primaryAccount.name,
+                            style: AppTextStyles.label(color: fg),
+                          ),
+                          Text(
+                            '฿${primaryAccount.balance.toStringAsFixed(2)}',
+                            style: AppTextStyles.bodySmall(color: AppColors.success),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('จากบัญชี', style: AppTextStyles.caption(color: muted)),
-                        Text(
-                          MockData.accounts[0].name,
-                          style: AppTextStyles.label(color: fg),
-                        ),
-                        Text(
-                          '฿${MockData.accounts[0].balance.toStringAsFixed(2)}',
-                          style: AppTextStyles.bodySmall(color: AppColors.success),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(LucideIcons.chevronDown, color: muted, size: 18),
-                ],
+                    Icon(LucideIcons.chevronDown, color: muted, size: 18),
+                  ],
+                ),
               ),
-            ),
 
             const SizedBox(height: 20),
 
@@ -97,7 +108,7 @@ class _TransferScreenState extends State<TransferScreen> {
               height: 80,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: MockData.quickContacts.length + 1,
+                itemCount: contacts.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return Padding(
@@ -124,7 +135,7 @@ class _TransferScreenState extends State<TransferScreen> {
                       ),
                     );
                   }
-                  final contact = MockData.quickContacts[index - 1];
+                  final contact = contacts[index - 1];
                   final isSelected = _selectedContact == index - 1;
                   return Padding(
                     padding: const EdgeInsets.only(right: 16),
@@ -152,7 +163,7 @@ class _TransferScreenState extends State<TransferScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                contact['avatar'] as String,
+                                contact.avatar,
                                 style: AppTextStyles.label(
                                   color: isSelected ? Colors.white : fg,
                                 ).copyWith(fontWeight: FontWeight.w600),
@@ -161,7 +172,7 @@ class _TransferScreenState extends State<TransferScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            contact['name'] as String,
+                            contact.name,
                             style: AppTextStyles.caption(
                               color: isSelected ? AppColors.chartIndigo : muted,
                             ),

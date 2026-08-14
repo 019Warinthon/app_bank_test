@@ -1,14 +1,8 @@
-// ─────────────────────────────────────────────
-// Model: AccountModel
-// Represents a bank account (savings, checking, credit).
-// ─────────────────────────────────────────────
+// lib/features/dashboard/models/account_model.dart
 
 import 'package:flutter/material.dart';
 
-/// The type of bank account.
 enum AccountType { savings, checking, credit }
-
-/// Account status
 enum AccountStatus { active, frozen, closed }
 
 class AccountModel {
@@ -19,7 +13,6 @@ class AccountModel {
   final double balance;
   final String accountNumber;
   final String currency;
-  final String bankCode; // e.g., 'KBANK', 'SCB', 'BBL'
   final DateTime openedAt;
 
   const AccountModel({
@@ -30,53 +23,32 @@ class AccountModel {
     required this.accountNumber,
     this.status = AccountStatus.active,
     this.currency = '฿',
-    this.bankCode = 'LUX',
     required this.openedAt,
   });
 
-  /// Shows last 4 digits, e.g. "••••3756"
   String get maskedNumber =>
       '••••${accountNumber.substring(accountNumber.length - 4)}';
-
-  /// Full formatted number, e.g. "482-1-09375-6"
-  String get formattedNumber {
-    if (accountNumber.length == 10) {
-      return '${accountNumber.substring(0, 3)}-${accountNumber.substring(3, 4)}-${accountNumber.substring(4, 9)}-${accountNumber.substring(9)}';
-    }
-    return accountNumber;
-  }
 
   bool get isActive => status == AccountStatus.active;
   bool get isCreditAccount => type == AccountType.credit;
 
-  /// Display label for account type
   String get typeLabel => switch (type) {
     AccountType.savings  => 'บัญชีออมทรัพย์',
     AccountType.checking => 'บัญชีกระแสรายวัน',
     AccountType.credit   => 'บัตรเครดิต',
   };
 
-  /// Color theme for each account type
   Color get typeColor => switch (type) {
     AccountType.savings  => const Color(0xFF10B981),
     AccountType.checking => const Color(0xFF6366F1),
     AccountType.credit   => const Color(0xFFEF4444),
   };
 
-  AccountModel copyWith({
-    AccountStatus? status,
-    double? balance,
-  }) {
-    return AccountModel(
-      id: id,
-      name: name,
-      type: type,
-      balance: balance ?? this.balance,
-      accountNumber: accountNumber,
-      status: status ?? this.status,
-      currency: currency,
-      bankCode: bankCode,
-      openedAt: openedAt,
-    );
-  }
+  AccountModel copyWith({AccountStatus? status, double? balance}) => AccountModel(
+    id: id, name: name, type: type,
+    balance: balance ?? this.balance,
+    accountNumber: accountNumber,
+    status: status ?? this.status,
+    currency: currency, openedAt: openedAt,
+  );
 }

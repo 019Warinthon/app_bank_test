@@ -1,8 +1,14 @@
+// lib/features/transactions/transactions_screen.dart
+// Screen: full transaction list with search + tab filter.
+// Uses: TransactionService (data) + TransactionTile (shared widget)
+
 import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../data/mock/mock_data.dart';
-import '../../data/models/transaction_model.dart';
+import '../../shared/widgets/app_empty_state.dart';
+import 'models/transaction_model.dart';
+import 'services/transaction_service.dart';
+import 'widgets/transaction_tile.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -14,6 +20,7 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreenState extends State<TransactionsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  final _txService = TransactionService.instance;
   String _searchQuery = '';
 
   @override
@@ -28,24 +35,13 @@ class _TransactionsScreenState extends State<TransactionsScreen>
     super.dispose();
   }
 
-  List<TransactionModel> get _filteredTransactions {
-    var list = MockData.transactions;
-    if (_searchQuery.isNotEmpty) {
-      list = list
-          .where((t) =>
-              t.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              (t.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
-                  false))
-          .toList();
-    }
-    switch (_tabController.index) {
-      case 1:
-        return list.where((t) => t.type == TransactionType.income).toList();
-      case 2:
-        return list.where((t) => t.type == TransactionType.expense).toList();
-      default:
-        return list;
-    }
+  List<TransactionModel> get _filtered {
+    TransactionType? type = switch (_tabController.index) {
+      1 => TransactionType.income,
+      2 => TransactionType.expense,
+      _ => null,
+    };
+    return _txService.filter(type: type, query: _searchQuery);
   }
 
   @override
@@ -53,8 +49,7 @@ class _TransactionsScreenState extends State<TransactionsScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
     final fg = isDark ? AppColors.foregroundDark : AppColors.foregroundLight;
-    final muted =
-        isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
+    final muted = isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
     final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final border = isDark ? AppColors.borderDark : AppColors.borderLight;
 
@@ -86,7 +81,7 @@ class _TransactionsScreenState extends State<TransactionsScreen>
 
           const SizedBox(height: 12),
 
-          // ── Tabs ──
+          // ── Tab bar ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Container(
@@ -124,94 +119,35 @@ class _TransactionsScreenState extends State<TransactionsScreen>
 
           const SizedBox(height: 16),
 
-          // ── Transaction List ──
+          // ── List ──
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: _filteredTransactions.length,
-              itemBuilder: (context, index) {
-                final tx = _filteredTransactions[index];
-                final isIncome = tx.isIncome;
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(AppColors.radiusLg),
-                    border: Border.all(color: border),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
+            child: _filtered.isEmpty
+                ? AppEmptyState(
+                    icon: LucideIcons.searchX,
+                    title: 'ไม่พบรายการ',
+                    subtitle: 'ลองเปลี่ยนคำค้นหาหรือตัวกรอง',
+                    actionLabel: 'ล้างการค้นหา',
+                    onAction: () => setState(() => _searchQuery = ''),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: _filtered.length,
+                    separatorBuilder: (_, index) => const SizedBox(height: 8),
+                    itemBuilder: (_, i) {
+                      final tx = _filtered[i];
+                      return Container(
                         decoration: BoxDecoration(
-                          color: (isIncome
-                                  ? AppColors.success
-                                  : AppColors.destructiveLight)
-                              .withValues(alpha: 0.1),
-                          borderRadius:
-                              BorderRadius.circular(AppColors.radiusMd),
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(AppColors.radiusLg),
+                          border: Border.all(color: border),
                         ),
-                        child: Icon(
-                          isIncome
-                              ? LucideIcons.arrowDownLeft
-                              : LucideIcons.arrowUpRight,
-                          color: isIncome
-                              ? AppColors.success
-                              : AppColors.destructiveLight,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(tx.title,
-                                style: AppTextStyles.label(color: fg)),
-                            if (tx.description != null)
-                              Text(tx.description!,
-                                  style: AppTextStyles.caption(color: muted)),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            tx.formattedAmount,
-                            style: AppTextStyles.label(
-                              color: isIncome
-                                  ? AppColors.success
-                                  : AppColors.destructiveLight,
-                            ).copyWith(fontWeight: FontWeight.w600),
-                          ),
-                          Text(
-                            _formatDate(tx.date),
-                            style: AppTextStyles.caption(color: muted),
-                          ),
-                        ],
-                      ),
-                    ],
+                        child: TransactionTile(tx: tx),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    if (diff.inHours < 1) return '${diff.inMinutes} นาทีก่อน';
-    if (diff.inHours < 24) return '${diff.inHours} ชม. ก่อน';
-    if (diff.inDays == 1) return 'เมื่อวาน';
-    if (diff.inDays < 7) return '${diff.inDays} วันก่อน';
-    return '${date.day}/${date.month}/${date.year}';
   }
 }
