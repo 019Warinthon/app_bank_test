@@ -224,66 +224,68 @@ class _CardsScreenState extends State<CardsScreen> {
             color: cardBg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
           child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: card.gradientColors),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(LucideIcons.creditCard, color: Colors.white, size: 24),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('ข้อมูลบัตร ${card.tierLabel} ${card.networkLabel}', style: AppTextStyles.h4(color: fg)),
-                          Text('ปลดล็อคข้อมูลความปลอดภัยเรียบร้อยแล้ว', style: AppTextStyles.caption(color: AppColors.success)),
-                        ],
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Divider(color: border, height: 1),
-                const SizedBox(height: 16),
-                _InfoCardRow(label: 'หมายเลขบัตร', value: card.cardNumber, canCopy: true, fg: fg, muted: muted),
-                const SizedBox(height: 12),
-                _InfoCardRow(label: 'ชื่อผู้ถือบัตร', value: card.holderName, fg: fg, muted: muted),
-                const SizedBox(height: 12),
-                _InfoCardRow(label: 'วันหมดอายุ (EXP)', value: card.expiryDate, fg: fg, muted: muted),
-                const SizedBox(height: 12),
-                _InfoCardRow(label: 'รหัสความปลอดภัย (CVV)', value: card.cvv, isSecret: true, fg: fg, muted: muted),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: BlocksButton(
-                    label: 'ปิด',
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    variant: BlocksButtonVariant.secondary,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: card.gradientColors),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(LucideIcons.creditCard, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('ข้อมูลบัตร ${card.tierLabel} ${card.networkLabel}', style: AppTextStyles.h4(color: fg)),
+                            Text('ปลดล็อคข้อมูลความปลอดภัยเรียบร้อยแล้ว', style: AppTextStyles.caption(color: AppColors.success)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Divider(color: border, height: 1),
+                  const SizedBox(height: 16),
+                  _InfoCardRow(label: 'หมายเลขบัตร', value: card.cardNumber, canCopy: true, fg: fg, muted: muted),
+                  const SizedBox(height: 12),
+                  _InfoCardRow(label: 'ชื่อผู้ถือบัตร', value: card.holderName, fg: fg, muted: muted),
+                  const SizedBox(height: 12),
+                  _InfoCardRow(label: 'วันหมดอายุ (EXP)', value: card.expiryDate, fg: fg, muted: muted),
+                  const SizedBox(height: 12),
+                  _InfoCardRow(label: 'รหัสความปลอดภัย (CVV)', value: card.cvv, isSecret: true, fg: fg, muted: muted),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: BlocksButton(
+                      label: 'ปิด',
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      variant: BlocksButtonVariant.secondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

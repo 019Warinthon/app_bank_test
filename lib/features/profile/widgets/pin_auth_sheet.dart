@@ -13,18 +13,19 @@ class PinAuthSheet extends StatefulWidget {
   const PinAuthSheet({
     super.key,
     this.title = 'ยืนยันรหัส PIN',
-    this.subtitle = 'กรุณากรอกรหัส PIN 6 หลักเพื่อเข้าใช้งานการโอนเงิน',
+    this.subtitle = 'กรุณากรอกรหัส PIN 6 หลักเพื่อเข้าใช้งาน',
     required this.onSuccess,
   });
 
   static Future<bool> show(
     BuildContext context, {
     String title = 'ยืนยันรหัส PIN',
-    String subtitle = 'กรุณากรอกรหัส PIN 6 หลักเพื่อเข้าใช้งานการโอนเงิน',
+    String subtitle = 'กรุณากรอกรหัส PIN 6 หลักเพื่อเข้าใช้งาน',
   }) async {
     final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => PinAuthSheet(
         title: title,
@@ -39,8 +40,7 @@ class PinAuthSheet extends StatefulWidget {
   State<PinAuthSheet> createState() => _PinAuthSheetState();
 }
 
-class _PinAuthSheetState extends State<PinAuthSheet>
-    with SingleTickerProviderStateMixin {
+class _PinAuthSheetState extends State<PinAuthSheet> with SingleTickerProviderStateMixin {
   String _enteredPin = '';
   String _errorMessage = '';
   int _failedAttempts = 0;
@@ -118,136 +118,139 @@ class _PinAuthSheetState extends State<PinAuthSheet>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.cardDark : AppColors.cardLight;
     final fg = isDark ? AppColors.foregroundDark : AppColors.foregroundLight;
-    final muted = isDark
-        ? AppColors.mutedForegroundDark
-        : AppColors.mutedForegroundLight;
+    final muted = isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: screenHeight * 0.9,
+      ),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 18),
-
-            // Icon Lock Badge
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.chartIndigo.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                LucideIcons.shieldCheck,
-                color: AppColors.chartIndigo,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Title & Subtitle
-            Text(widget.title, style: AppTextStyles.h3(color: fg)),
-            const SizedBox(height: 4),
-            Text(
-              widget.subtitle,
-              style: AppTextStyles.bodySmall(color: muted),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-
-            // 6 PIN Dots with Shake
-            AnimatedBuilder(
-              animation: _shakeController,
-              builder: (context, child) {
-                final offset = (_shakeController.value * 6 * 3.14159);
-                return Transform.translate(
-                  offset: Offset(
-                    _shakeController.isAnimating
-                        ? (10 *
-                              (1 - _shakeController.value) *
-                              (offset % 2 == 0 ? 1 : -1))
-                        : 0,
-                    0,
-                  ),
-                  child: child,
-                );
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(6, (i) {
-                  final isFilled = i < _enteredPin.length;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: isFilled
-                          ? AppColors.chartIndigo
-                          : Colors.transparent,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isFilled
-                            ? AppColors.chartIndigo
-                            : (isDark
-                                  ? AppColors.borderDark
-                                  : AppColors.borderLight),
-                        width: 2,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-
-            if (_errorMessage.isNotEmpty) ...[
               const SizedBox(height: 12),
-              Text(
-                _errorMessage,
-                style: AppTextStyles.caption(
-                  color: AppColors.destructiveLight,
-                ).copyWith(fontWeight: FontWeight.w600),
+
+              // Icon Lock Badge
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.chartIndigo.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(LucideIcons.shieldCheck, color: AppColors.chartIndigo, size: 22),
+              ),
+              const SizedBox(height: 10),
+
+              // Title & Subtitle
+              Text(widget.title, style: AppTextStyles.h4(color: fg), textAlign: TextAlign.center),
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.subtitle,
+                  style: AppTextStyles.caption(color: muted),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 6 PIN Dots with Shake
+              AnimatedBuilder(
+                animation: _shakeController,
+                builder: (context, child) {
+                  final offset = (_shakeController.value * 6 * 3.14159);
+                  return Transform.translate(
+                    offset: Offset(
+                      _shakeController.isAnimating
+                          ? (8 * (1 - _shakeController.value) * (offset % 2 == 0 ? 1 : -1))
+                          : 0,
+                      0,
+                    ),
+                    child: child,
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(6, (i) {
+                    final isFilled = i < _enteredPin.length;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: isFilled ? AppColors.chartIndigo : Colors.transparent,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isFilled ? AppColors.chartIndigo : (isDark ? AppColors.borderDark : AppColors.borderLight),
+                          width: 1.8,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+
+              if (_errorMessage.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _errorMessage,
+                  style: AppTextStyles.caption(color: AppColors.destructiveLight).copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
+
+              const SizedBox(height: 16),
+
+              // Keypad Box
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 300),
+                child: _buildKeypad(fg, muted),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Forgot PIN
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('กรุณาติดต่อสาขาธนาคารเพื่อรีเซ็ตรหัส PIN')),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'ลืมรหัส PIN?',
+                  style: AppTextStyles.caption(color: AppColors.chartIndigo),
+                ),
               ),
             ],
-
-            const SizedBox(height: 24),
-
-            // Keypad
-            _buildKeypad(fg, muted),
-            const SizedBox(height: 12),
-
-            // Forgot PIN
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('กรุณาติดต่อสาขาธนาคารเพื่อรีเซ็ตรหัส PIN'),
-                  ),
-                );
-              },
-              child: Text(
-                'ลืมรหัส PIN?',
-                style: AppTextStyles.bodySmall(color: AppColors.chartIndigo),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -258,42 +261,25 @@ class _PinAuthSheetState extends State<PinAuthSheet>
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: ['1', '2', '3']
-              .map(
-                (n) =>
-                    _KeypadButton(label: n, onTap: () => _onNumberPressed(n)),
-              )
-              .toList(),
+          children: ['1', '2', '3'].map((n) => _KeypadButton(label: n, onTap: () => _onNumberPressed(n))).toList(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: ['4', '5', '6']
-              .map(
-                (n) =>
-                    _KeypadButton(label: n, onTap: () => _onNumberPressed(n)),
-              )
-              .toList(),
+          children: ['4', '5', '6'].map((n) => _KeypadButton(label: n, onTap: () => _onNumberPressed(n))).toList(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: ['7', '8', '9']
-              .map(
-                (n) =>
-                    _KeypadButton(label: n, onTap: () => _onNumberPressed(n)),
-              )
-              .toList(),
+          children: ['7', '8', '9'].map((n) => _KeypadButton(label: n, onTap: () => _onNumberPressed(n))).toList(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // Biometric button (Face ID / Fingerprint)
             _KeypadActionButton(
-              icon: SecurityService.instance.useFaceId
-                  ? LucideIcons.scanFace
-                  : LucideIcons.fingerprint,
+              icon: SecurityService.instance.useFaceId ? LucideIcons.scanFace : LucideIcons.fingerprint,
               onTap: _triggerBiometricAuth,
               color: AppColors.chartIndigo,
             ),
@@ -327,20 +313,18 @@ class _KeypadButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(36),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          width: 72,
-          height: 64,
+          width: 68,
+          height: 52,
           decoration: BoxDecoration(
             color: btnBg.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           alignment: Alignment.center,
           child: Text(
             label,
-            style: AppTextStyles.h2(
-              color: fg,
-            ).copyWith(fontWeight: FontWeight.w600),
+            style: AppTextStyles.h3(color: fg).copyWith(fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -365,12 +349,12 @@ class _KeypadActionButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          width: 72,
-          height: 64,
+          width: 68,
+          height: 52,
           alignment: Alignment.center,
-          child: Icon(icon, color: color, size: 28),
+          child: Icon(icon, color: color, size: 24),
         ),
       ),
     );
