@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'services/security_service.dart';
+import 'widgets/biometric_auth_dialog.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({super.key});
@@ -120,70 +122,21 @@ class _SecurityScreenState extends State<SecurityScreen> {
     );
   }
 
-  void _simulateBiometricAuth(String type) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        final cardBg = isDark ? AppColors.cardDark : AppColors.cardLight;
-        final fg = isDark ? AppColors.foregroundDark : AppColors.foregroundLight;
-        final muted = isDark ? AppColors.mutedForegroundDark : AppColors.mutedForegroundLight;
-
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: muted.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Icon(
-                type == 'Face ID' ? LucideIcons.scanFace : LucideIcons.fingerprint,
-                size: 64,
-                color: AppColors.chartIndigo,
-              ),
-              const SizedBox(height: 16),
-              Text('กำลังสแกน $type...', style: AppTextStyles.h4(color: fg)),
-              const SizedBox(height: 8),
-              Text(
-                'วางลายนิ้วมือหรือมองตรงไปที่หน้าจอเพื่อยืนยันตัวตน',
-                textAlign: TextAlign.center,
-                style: AppTextStyles.caption(color: muted),
-              ),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: double.infinity,
-                child: BlocksButton(
-                  label: 'ทดสอบสแกนสำเร็จ',
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('ยืนยันตัวตนด้วย $type สำเร็จ!'),
-                        backgroundColor: AppColors.success,
-                      ),
-                    );
-                  },
-                  variant: BlocksButtonVariant.primary,
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ),
-        );
-      },
+  Future<void> _simulateBiometricAuth(String type) async {
+    final isFace = type.contains('Face');
+    final success = await BiometricAuthDialog.show(
+      context,
+      type: isFace ? BiometricType.faceId : BiometricType.fingerprint,
     );
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('สแกน $type สำเร็จเรียบร้อย!'),
+          backgroundColor: const Color(0xFF10B981),
+        ),
+      );
+    }
   }
 
   @override
@@ -292,7 +245,10 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     title: 'เปิดใช้ Touch ID / ลายนิ้วมือ',
                     subtitle: 'สแกนเพื่อเข้าสู่ระบบอย่างรวดเร็ว',
                     value: _useFingerprint,
-                    onChanged: (v) => setState(() => _useFingerprint = v),
+                    onChanged: (v) {
+                      setState(() => _useFingerprint = v);
+                      SecurityService.instance.toggleBiometrics(v);
+                    },
                     onTestTap: () => _simulateBiometricAuth('Touch ID'),
                     fg: fg,
                     muted: muted,
@@ -304,7 +260,10 @@ class _SecurityScreenState extends State<SecurityScreen> {
                     title: 'เปิดใช้ Face ID / สแกนใบหน้า',
                     subtitle: 'ยืนยันใบหน้าก่อนอนุมัติการโอนเงิน',
                     value: _useFaceId,
-                    onChanged: (v) => setState(() => _useFaceId = v),
+                    onChanged: (v) {
+                      setState(() => _useFaceId = v);
+                      SecurityService.instance.toggleFaceId(v);
+                    },
                     onTestTap: () => _simulateBiometricAuth('Face ID'),
                     fg: fg,
                     muted: muted,

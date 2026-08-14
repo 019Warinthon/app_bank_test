@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lux_blocks/lux_blocks.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../services/security_service.dart';
+import 'biometric_auth_dialog.dart';
 
 class PinAuthSheet extends StatefulWidget {
   final String title;
@@ -105,7 +106,7 @@ class _PinAuthSheetState extends State<PinAuthSheet> with SingleTickerProviderSt
   }
 
   Future<void> _triggerBiometricAuth() async {
-    final success = await SecurityService.instance.authenticateWithBiometrics();
+    final success = await BiometricAuthDialog.show(context);
     if (!mounted) return;
 
     if (success) {
